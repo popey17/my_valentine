@@ -12,13 +12,15 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, observerOptions);
 
-// Observe all timeline items and finale
+// Observe all timeline items, finale, and valentine question
 document.addEventListener("DOMContentLoaded", () => {
   const timelineItems = document.querySelectorAll(".timeline-item");
   const finale = document.querySelector(".timeline-finale");
+  const valentineQuestion = document.querySelector(".valentine-question");
 
   timelineItems.forEach((item) => observer.observe(item));
   if (finale) observer.observe(finale);
+  if (valentineQuestion) observer.observe(valentineQuestion);
 });
 
 // ===== Music Toggle Functionality =====
@@ -27,14 +29,11 @@ const bgMusic = document.getElementById("bgMusic");
 const musicText = musicToggle.querySelector(".music-text");
 
 let isPlaying = false;
+let hasAutoPlayed = false;
 
-musicToggle.addEventListener("click", () => {
-  if (isPlaying) {
-    bgMusic.pause();
-    musicToggle.classList.remove("playing");
-    musicText.textContent = "Play Music";
-    isPlaying = false;
-  } else {
+// Function to play music
+function playMusic() {
+  if (!isPlaying) {
     bgMusic
       .play()
       .then(() => {
@@ -44,12 +43,31 @@ musicToggle.addEventListener("click", () => {
       })
       .catch((error) => {
         console.log("Audio playback failed:", error);
-        // Fallback: show message to user
-        musicText.textContent = "Music Unavailable";
-        setTimeout(() => {
-          musicText.textContent = "Play Music";
-        }, 2000);
       });
+  }
+}
+
+// Function to pause music
+function pauseMusic() {
+  bgMusic.pause();
+  musicToggle.classList.remove("playing");
+  musicText.textContent = "Play Music";
+  isPlaying = false;
+}
+
+musicToggle.addEventListener("click", () => {
+  if (isPlaying) {
+    pauseMusic();
+  } else {
+    playMusic();
+  }
+});
+
+// Auto-play music when user scrolls
+window.addEventListener("scroll", () => {
+  if (!hasAutoPlayed && window.pageYOffset > 100) {
+    playMusic();
+    hasAutoPlayed = true;
   }
 });
 
@@ -250,3 +268,67 @@ if (finaleHeart) {
     }, 10);
   });
 }
+
+// ===== Valentine's Question Interactive Buttons =====
+document.addEventListener("DOMContentLoaded", () => {
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const responseMessage = document.getElementById("responseMessage");
+
+  if (yesBtn) {
+    yesBtn.addEventListener("click", () => {
+      // Massive celebration!
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => createFloatingHeart(), i * 30);
+      }
+
+      // Show success message
+      responseMessage.innerHTML = `
+        <div style="font-size: 3rem; margin-bottom: 15px;">🎉✨💖✨🎉</div>
+        <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">
+          YES! You Said Yes!
+        </div>
+        <div style="font-size: 1.1rem;">
+          You've made me the happiest person alive!<br>
+          Happy Valentine's Day, my love! ❤️
+        </div>
+      `;
+      responseMessage.classList.remove("hidden");
+      responseMessage.classList.add("success");
+
+      // Hide buttons
+      yesBtn.style.display = "none";
+      noBtn.style.display = "none";
+    });
+  }
+
+  if (noBtn) {
+    let clickCount = 0;
+    noBtn.addEventListener("click", () => {
+      clickCount++;
+
+      if (clickCount === 1) {
+        noBtn.textContent = "Are you sure? 🥺";
+        // Move button slightly
+        noBtn.style.transform = "translateX(20px)";
+      } else if (clickCount === 2) {
+        noBtn.textContent = "Think again... 💭";
+        noBtn.style.transform = "translateX(-20px)";
+      } else if (clickCount === 3) {
+        noBtn.textContent = "Please? 🙏";
+        noBtn.style.transform = "translateY(-10px)";
+      } else if (clickCount === 4) {
+        noBtn.textContent = "Pretty please? 🥹";
+        noBtn.style.transform = "scale(0.8)";
+      } else {
+        // After 5 clicks, remove No button and make Yes bigger
+        noBtn.style.opacity = "0";
+        setTimeout(() => {
+          noBtn.style.display = "none";
+          yesBtn.textContent = "Yes! 💕 (Only option 😊)";
+          yesBtn.style.transform = "scale(1.3)";
+        }, 300);
+      }
+    });
+  }
+});
